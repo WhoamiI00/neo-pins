@@ -1,0 +1,266 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Pinterest-inspired design system with clean aesthetics and visual focus.
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Modern Pinterest-inspired color palette */
+    --background: 0 0% 99%;
+    --foreground: 0 0% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+
+    /* Pinterest red as primary with modern twist */
+    --primary: 0 85% 63%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 0 85% 58%;
+
+    /* Warm neutral grays */
+    --secondary: 20 14% 96%;
+    --secondary-foreground: 0 0% 15%;
+
+    --muted: 20 14% 96%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 20 14% 94%;
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Refined borders and inputs */
+    --border: 20 5% 89%;
+    --input: 20 5% 89%;
+    --ring: 0 85% 63%;
+
+    /* Modern rounded corners */
+    --radius: 0.75rem;
+
+    /* Enhanced Pinterest-inspired design tokens */
+    --pinterest-red: 0 85% 63%;
+    --pinterest-red-hover: 0 85% 58%;
+    --soft-gray: 20 14% 96%;
+    --medium-gray: 20 7% 85%;
+    --text-light: 0 0% 40%;
+    
+    /* Modern shadows with warmth */
+    --shadow-soft: 0 2px 20px -4px hsl(0 0% 0% / 0.06);
+    --shadow-card: 0 4px 32px -8px hsl(0 0% 0% / 0.12);
+    --shadow-hover: 0 8px 40px -12px hsl(0 0% 0% / 0.15);
+    
+    /* Glass morphism effects */
+    --glass-bg: 0 0% 100% / 0.8;
+    --glass-border: 0 0% 100% / 0.2;
+    
+    /* Smooth transitions */
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Sophisticated dark theme with modern Pinterest aesthetics */
+    --background: 220 20% 8%;
+    --foreground: 220 15% 95%;
+
+    --card: 220 20% 11%;
+    --card-foreground: 220 15% 95%;
+
+    --popover: 220 20% 11%;
+    --popover-foreground: 220 15% 95%;
+
+    /* Pinterest red optimized for dark mode */
+    --primary: 0 90% 70%;
+    --primary-foreground: 220 20% 8%;
+    --primary-hover: 0 90% 75%;
+
+    --secondary: 220 15% 16%;
+    --secondary-foreground: 220 15% 90%;
+
+    --muted: 220 15% 14%;
+    --muted-foreground: 220 10% 55%;
+
+    --accent: 220 15% 18%;
+    --accent-foreground: 220 15% 95%;
+
+    --destructive: 0 84% 68%;
+    --destructive-foreground: 220 15% 95%;
+
+    --border: 220 15% 20%;
+    --input: 220 15% 14%;
+    --ring: 0 90% 70%;
+    
+    /* Refined dark mode tokens */
+    --pinterest-red: 0 90% 70%;
+    --pinterest-red-hover: 0 90% 75%;
+    --soft-gray: 220 15% 14%;
+    --medium-gray: 220 15% 20%;
+    --text-light: 220 10% 55%;
+    
+    /* Enhanced dark shadows */
+    --shadow-soft: 0 2px 24px -6px hsl(0 0% 0% / 0.5);
+    --shadow-card: 0 4px 40px -12px hsl(0 0% 0% / 0.7);
+    --shadow-hover: 0 8px 50px -16px hsl(0 0% 0% / 0.8);
+    
+    /* Dark glass effects */
+    --glass-bg: 220 20% 11% / 0.8;
+    --glass-border: 220 20% 30% / 0.2;
+    
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 38% 95%;
+    --sidebar-primary: 0 84% 68%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 220 27% 18%;
+    --sidebar-accent-foreground: 210 38% 95%;
+    --sidebar-border: 220 27% 25%;
+    --sidebar-ring: 0 84% 68%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  /* Interactive Elements */
+  .story-link {
+    @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
+  }
+  
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-[1.02];
+  }
+  
+  .hover-lift {
+    @apply transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-card;
+  }
+  
+  .hover-float {
+    @apply transition-all duration-500 hover:-translate-y-2 hover:shadow-card;
+  }
+  
+  /* Loading states */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--muted-foreground) / 0.08),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  /* Enhanced focus states */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-background transition-all;
+  }
+  
+  /* Modern glass effects */
+  .glass {
+    background: hsl(var(--glass-bg));
+    border: 1px solid hsl(var(--glass-border));
+    @apply backdrop-blur-xl;
+  }
+  
+  .glass-card {
+    background: hsl(var(--glass-bg));
+    border: 1px solid hsl(var(--glass-border));
+    @apply backdrop-blur-xl shadow-soft;
+  }
+  
+  /* Gradient backgrounds */
+  .gradient-warm {
+    background: linear-gradient(135deg, hsl(var(--background)), hsl(var(--muted)));
+  }
+  
+  .gradient-card {
+    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--muted)/0.3));
+  }
+  
+  /* Smooth scrolling */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground)/0.3) transparent;
+  }
+  
+  .smooth-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .smooth-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .smooth-scroll::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.2);
+    border-radius: 6px;
+  }
+  
+  .smooth-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.4);
+  }
+  
+  /* Text effects */
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--pinterest-red)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Pin card enhancements */
+  .pin-card {
+    @apply bg-card border-0 shadow-soft hover:shadow-card transition-all duration-300 hover-float;
+  }
+  
+  /* Modern buttons */
+  .btn-modern {
+    @apply relative overflow-hidden transition-all duration-300 hover:shadow-card;
+  }
+  
+  .btn-modern::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] transition-transform duration-700;
+  }
+  
+  .btn-modern:hover::before {
+    @apply translate-x-[100%];
+  }
+}

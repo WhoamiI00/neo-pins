@@ -1,0 +1,4 @@
+project_id = "mgnqefivlbnshzbdthnm"
+
+[functions.bot-protection]
+verify_jwt = false
