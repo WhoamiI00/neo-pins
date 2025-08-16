@@ -101,22 +101,22 @@ const PinModalComments = ({ comments, pinId, onCommentsUpdate }: PinModalComment
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-background">
       {/* Comments header */}
-      <div className="p-6 border-b">
-        <h3 className="text-lg font-semibold">Comments ({comments.length})</h3>
+      <div className="p-3 sm:p-6 border-b flex-shrink-0">
+        <h3 className="text-base sm:text-lg font-semibold">Comments ({comments.length})</h3>
       </div>
 
       {/* Comments list */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-6 min-h-0">
         {comments.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
+          <div className="text-center py-6 sm:py-8">
+            <p className="text-sm sm:text-base text-muted-foreground">No comments yet. Be the first to comment!</p>
           </div>
         ) : (
           comments.map((comment) => (
             <div key={comment.id} className="group">
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 <Avatar 
-                  className="h-8 w-8 cursor-pointer"
+                  className="h-7 w-7 sm:h-8 sm:w-8 cursor-pointer flex-shrink-0"
                   onClick={() => navigate(`/user/${comment.user_id}`)}
                 >
                   <AvatarImage src={comment.profiles?.avatar_url} />
@@ -124,16 +124,16 @@ const PinModalComments = ({ comments, pinId, onCommentsUpdate }: PinModalComment
                     {(comment.profiles?.full_name || comment.profiles?.email || 'U').charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 space-y-1">
+                <div className="flex-1 space-y-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2 min-w-0">
                       <span 
-                        className="font-medium text-sm cursor-pointer hover:text-primary transition-colors"
+                        className="font-medium text-xs sm:text-sm cursor-pointer hover:text-primary transition-colors truncate"
                         onClick={() => navigate(`/user/${comment.user_id}`)}
                       >
                         {comment.profiles?.full_name || comment.profiles?.email || 'Anonymous'}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground hidden sm:inline">
                         {formatDistanceToNow(new Date(comment.created_at))} ago
                       </span>
                     </div>
@@ -143,10 +143,10 @@ const PinModalComments = ({ comments, pinId, onCommentsUpdate }: PinModalComment
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="h-6 w-6 sm:h-8 sm:w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                             disabled={deletingComment === comment.id}
                           >
-                            <MoreHorizontal className="h-4 w-4" />
+                            <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -162,7 +162,10 @@ const PinModalComments = ({ comments, pinId, onCommentsUpdate }: PinModalComment
                       </DropdownMenu>
                     )}
                   </div>
-                  <p className="text-sm leading-relaxed">{comment.content}</p>
+                  <p className="text-xs sm:text-sm leading-relaxed break-words">{comment.content}</p>
+                  <span className="text-xs text-muted-foreground sm:hidden">
+                    {formatDistanceToNow(new Date(comment.created_at))} ago
+                  </span>
                 </div>
               </div>
             </div>
@@ -171,20 +174,20 @@ const PinModalComments = ({ comments, pinId, onCommentsUpdate }: PinModalComment
       </div>
 
       {/* Add comment */}
-      <div className="p-6 border-t bg-muted/30">
-        <div className="space-y-3">
+      <div className="p-3 sm:p-6 border-t bg-muted/30 flex-shrink-0">
+        <div className="space-y-2 sm:space-y-3">
           <Textarea
             placeholder="Add a comment..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            className="resize-none border-0 bg-background shadow-sm"
-            rows={3}
+            className="resize-none border-0 bg-background shadow-sm text-sm sm:text-base"
+            rows={2}
           />
           <div className="flex justify-end">
             <Button 
               onClick={addComment} 
               disabled={!newComment.trim() || loading}
-              className="rounded-full px-6"
+              className="rounded-full px-4 sm:px-6 text-xs sm:text-sm h-8 sm:h-10"
             >
               {loading ? "Posting..." : "Post Comment"}
             </Button>

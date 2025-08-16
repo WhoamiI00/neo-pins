@@ -406,7 +406,13 @@ const Profile = () => {
                 </Button>
               </Card>
             ) : (
-              <PinGrid pins={userPins} />
+              <PinGrid 
+                pins={userPins} 
+                currentUserId={session?.user?.id}
+                onPinDeleted={(pinId) => {
+                  setUserPins(userPins.filter(pin => pin.id !== pinId));
+                }}
+              />
             )}
           </div>
         </div>

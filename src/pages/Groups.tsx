@@ -43,7 +43,11 @@ const Groups = () => {
   const checkAuth = async () => {
     try {
       const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) throw error;
+      if (error) {
+        console.error('Auth error:', error);
+        navigate('/auth');
+        return;
+      }
       
       if (!user) {
         navigate('/auth');
@@ -61,22 +65,29 @@ const Groups = () => {
 
   const fetchGroupDetails = async (groupId: string) => {
     try {
-      const { data, error } = await supabase
+      // First, get the user's role in the group
+      const { data: memberData, error: memberError } = await supabase
         .from('group_members')
-        .select(`
-          role,
-          groups!inner(*)
-        `)
+        .select('role')
         .eq('group_id', groupId)
         .eq('user_id', user.id)
         .single();
 
-      if (error) throw error;
+      if (memberError) throw memberError;
 
-      if (data) {
+      // Then get the group details
+      const { data: groupData, error: groupError } = await supabase
+        .from('groups')
+        .select('*')
+        .eq('id', groupId)
+        .single();
+
+      if (groupError) throw groupError;
+
+      if (memberData && groupData) {
         setSelectedGroup({
-          ...data.groups,
-          member_role: data.role,
+          ...groupData,
+          member_role: memberData.role,
         });
       }
     } catch (error) {

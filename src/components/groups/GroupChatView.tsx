@@ -62,6 +62,7 @@ export const GroupChatView = ({ group, onOpenSettings, onOpenInvite }: GroupChat
           filter: `group_id=eq.${group.id}`,
         },
         (payload) => {
+          console.log('New message received:', payload);
           // Fetch the new message with profile data
           fetchMessageWithProfile(payload.new.id);
         }
@@ -83,6 +84,7 @@ export const GroupChatView = ({ group, onOpenSettings, onOpenInvite }: GroupChat
   };
 
   const fetchMessages = async () => {
+    console.log('Fetching messages for group:', group.id);
     try {
       const { data: messagesData, error } = await supabase
         .from('group_messages')
@@ -91,7 +93,12 @@ export const GroupChatView = ({ group, onOpenSettings, onOpenInvite }: GroupChat
         .order('created_at', { ascending: true })
         .limit(100);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching messages:', error);
+        throw error;
+      }
+
+      console.log('Raw messages data:', messagesData);
 
       // Fetch profiles separately
       const userIds = [...new Set(messagesData?.map(m => m.user_id) || [])];

@@ -228,10 +228,10 @@ const PinModal = ({ pin, isOpen, onClose, pinId }: PinModalProps) => {
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent ref={modalRef} className="max-w-6xl max-h-[95vh] p-0 overflow-hidden" hideCloseButton>
-          <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
+        <DialogContent ref={modalRef} className="max-w-6xl max-h-[95vh] p-0 overflow-hidden w-[95vw] sm:w-full" hideCloseButton>
+          <div className="grid grid-cols-1 lg:grid-cols-2 h-full max-h-[95vh]">
             {/* Image Section */}
-            <div className="relative bg-muted/30 flex items-center justify-center p-4">
+            <div className="relative bg-muted/30 flex items-center justify-center p-2 sm:p-4 max-h-[40vh] lg:max-h-none">
               <img
                 src={displayPin.image_url}
                 alt={displayPin.title}
@@ -240,7 +240,7 @@ const PinModal = ({ pin, isOpen, onClose, pinId }: PinModalProps) => {
             </div>
 
             {/* Content Section */}
-            <div className="flex flex-col h-full max-h-[95vh]">
+            <div className="flex flex-col h-full max-h-[55vh] lg:max-h-[95vh] min-h-0">
               <PinModalHeader
                 pin={displayPin}
                 isLiked={isLiked}
@@ -248,6 +248,10 @@ const PinModal = ({ pin, isOpen, onClose, pinId }: PinModalProps) => {
                 onLike={toggleLike}
                 onSave={() => setShowSaveDialog(true)}
                 onClose={handleClose}
+                onPinDeleted={() => {
+                  handleClose();
+                  // Optionally navigate away or refresh data
+                }}
               />
               
               <PinModalComments

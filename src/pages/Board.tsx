@@ -314,7 +314,13 @@ const Board = () => {
             )}
           </Card>
         ) : (
-          <PinGrid pins={pins} />
+          <PinGrid 
+            pins={pins} 
+            currentUserId={session?.user?.id}
+            onPinDeleted={(pinId) => {
+              setPins(pins.filter(pin => pin.id !== pinId));
+            }}
+          />
         )}
       </main>
     </div>

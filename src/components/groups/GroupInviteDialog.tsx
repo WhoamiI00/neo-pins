@@ -59,7 +59,16 @@ export const GroupInviteDialog = ({ open, onOpenChange, group }: GroupInviteDial
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching invites:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load invite links',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
       setInvites(data || []);
     } catch (error) {
       console.error('Error fetching invites:', error);

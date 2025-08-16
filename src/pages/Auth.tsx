@@ -23,11 +23,23 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Clear any error state and messages when component mounts
+    setError("");
+    setMessage("");
+    
     // Check if user is already logged in
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/");
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Session check error:', error);
+          return;
+        }
+        if (session) {
+          navigate("/");
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
       }
     };
     

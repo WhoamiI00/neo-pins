@@ -22,9 +22,11 @@ interface PinGridProps {
   pins: Pin[];
   onPinClick?: (pin: Pin) => void;
   className?: string;
+  currentUserId?: string;
+  onPinDeleted?: (pinId: string) => void;
 }
 
-const PinGrid = ({ pins, onPinClick, className }: PinGridProps) => {
+const PinGrid = ({ pins, onPinClick, className, currentUserId, onPinDeleted }: PinGridProps) => {
   const [columns, setColumns] = useState(4);
   const navigate = useNavigate();
 
@@ -90,6 +92,8 @@ const PinGrid = ({ pins, onPinClick, className }: PinGridProps) => {
                   onPinClick?.(pin);
                 }}
                 className="w-full"
+                currentUserId={currentUserId}
+                onPinDeleted={onPinDeleted}
               />
             ))}
           </div>

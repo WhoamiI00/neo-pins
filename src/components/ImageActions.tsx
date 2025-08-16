@@ -1,23 +1,50 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, MoreVertical } from "lucide-react";
+import { Download, MoreVertical, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ImageActionsProps {
   imageUrl: string;
   title: string;
   className?: string;
+  pinId?: string;
+  userId?: string;
+  currentUserId?: string;
+  onDelete?: () => void;
 }
 
-const ImageActions = ({ imageUrl, title, className = "" }: ImageActionsProps) => {
+const ImageActions = ({ 
+  imageUrl, 
+  title, 
+  className = "", 
+  pinId, 
+  userId, 
+  currentUserId, 
+  onDelete 
+}: ImageActionsProps) => {
   const [downloading, setDownloading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
+
+  const canDelete = pinId && userId && currentUserId && userId === currentUserId;
 
   const handleDownload = async () => {
     try {
@@ -61,44 +88,110 @@ const ImageActions = ({ imageUrl, title, className = "" }: ImageActionsProps) =>
     }
   };
 
-  return (
-    <div className={`flex items-center space-x-2 ${className}`}>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleDownload}
-        disabled={downloading}
-        className="rounded-full hover-scale bg-white/90 hover:bg-white text-foreground dark:bg-background/90 dark:hover:bg-background shadow-lg"
-      >
-        {downloading ? (
-          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <Download className="h-4 w-4" />
-        )}
-      </Button>
+  const handleDelete = async () => {
+    if (!pinId) return;
+    
+    try {
+      setDeleting(true);
       
-{/*       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="rounded-full hover-scale bg-white/90 hover:bg-white text-foreground dark:bg-background/90 dark:hover:bg-background shadow-lg"
-          >
-            <MoreVertical className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="animate-fade-in">
-          <DropdownMenuItem onClick={handleDownload} disabled={downloading}>
-            <Download className="mr-2 h-4 w-4" />
-            {downloading ? "Downloading..." : "Download Image"}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => window.open(imageUrl, '_blank')}>
-            <span className="mr-2">🔗</span>
-            Open in New Tab
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu> */}
-    </div>
+      // Delete the pin from database
+      const { error } = await supabase
+        .from('pins')
+        .delete()
+        .eq('id', pinId)
+        .eq('user_id', currentUserId); // Extra security check
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Pin deleted",
+        description: "Your pin has been deleted successfully.",
+      });
+      
+      setShowDeleteDialog(false);
+      onDelete?.();
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast({
+        title: "Delete failed",
+        description: "Could not delete the pin. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <>
+      <div className={`flex items-center space-x-2 ${className}`}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleDownload}
+          disabled={downloading}
+          className="rounded-full hover-scale bg-white/90 hover:bg-white text-foreground dark:bg-background/90 dark:hover:bg-background shadow-lg h-8 w-8 sm:h-10 sm:w-10"
+        >
+          {downloading ? (
+            <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+          )}
+        </Button>
+        
+        {canDelete && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-full hover-scale bg-white/90 hover:bg-white text-foreground dark:bg-background/90 dark:hover:bg-background shadow-lg h-8 w-8 sm:h-10 sm:w-10"
+              >
+                <MoreVertical className="h-3 w-3 sm:h-4 sm:w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="animate-fade-in">
+              <DropdownMenuItem onClick={handleDownload} disabled={downloading}>
+                <Download className="mr-2 h-4 w-4" />
+                {downloading ? "Downloading..." : "Download Image"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => window.open(imageUrl, '_blank')}>
+                <span className="mr-2">🔗</span>
+                Open in New Tab
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Pin
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Pin</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 

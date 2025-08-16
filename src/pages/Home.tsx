@@ -35,6 +35,14 @@ const Home = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const handlePinDeleted = (pinId: string) => {
+    setPins(prev => prev.filter(pin => pin.id !== pinId));
+    toast({
+      title: "Pin deleted",
+      description: "Pin has been removed from your view.",
+    });
+  };
+
   // Check if we're on a pin route
   useEffect(() => {
     if (pinId) {
@@ -158,7 +166,7 @@ const Home = () => {
                   Explore beautiful pins from our community and get inspired for your next project
                 </p>
               </div>
-              <PinGrid pins={pins.slice(0, 12)} />
+              <PinGrid pins={pins.slice(0, 12)} currentUserId={session?.user?.id} />
               {pinId && (
                 <PinModal
                   pin={null}
@@ -195,7 +203,11 @@ const Home = () => {
             </div>
           </div>
         ) : (
-          <PinGrid pins={pins} />
+          <PinGrid 
+            pins={pins} 
+            currentUserId={session?.user?.id}
+            onPinDeleted={handlePinDeleted}
+          />
         )}
         
         {pinId && (

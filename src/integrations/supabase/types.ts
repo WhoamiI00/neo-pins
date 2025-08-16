@@ -388,6 +388,14 @@ export type Database = {
           group_id: string
         }[]
       }
+      user_is_group_admin: {
+        Args: { user_uuid: string; group_uuid: string }
+        Returns: boolean
+      }
+      user_is_group_member: {
+        Args: { user_uuid: string; group_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
