@@ -78,6 +78,7 @@ export default {
 				'soft': 'var(--shadow-soft)',
 				'card': 'var(--shadow-card)',
 				'hover': 'var(--shadow-hover)',
+				'glow': 'var(--shadow-glow)',
 			},
 			transitionTimingFunction: {
 				'smooth': 'var(--transition-smooth)',

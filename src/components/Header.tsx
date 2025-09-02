@@ -142,7 +142,7 @@ const Header = () => {
           {user ? (
             <>
               <ThemeToggle />
-{/*               <Button 
+              <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => navigate("/groups")}
@@ -150,7 +150,7 @@ const Header = () => {
               >
                 <Users className="h-4 w-4 md:mr-2" />
                 <span className="hidden md:inline">Groups</span>
-              </Button> */}
+              </Button> 
               <Button 
                 variant="ghost" 
                 size="sm"

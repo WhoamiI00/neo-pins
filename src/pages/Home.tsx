@@ -3,10 +3,13 @@ import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import PinGrid from "@/components/PinGrid";
 import PinModal from "@/components/PinModal";
+import NetworkIndicator from "@/components/NetworkIndicator";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
+import { ExternalLink } from "lucide-react";
 
 interface Pin {
   id: string;
@@ -151,35 +154,55 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Sample pins for logged out users */}
-          {loading ? (
-            <div className="flex justify-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        {/* Sample pins for logged out users */}
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading inspiring pins...</p>
             </div>
-          ) : (
-            <div className="mb-8">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient">
-                  Discover inspiring ideas
-                </h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Explore beautiful pins from our community and get inspired for your next project
+          </div>
+        ) : (
+          <div className="mb-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient">
+              Discover inspiring ideas
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Explore beautiful pins from our community and get inspired for your next project
+            </p>
+            
+            {/* Interactive Pinboard Preview */}
+            <div className="mt-8 max-w-md mx-auto">
+              <Card className="p-4 glass-card hover-lift cursor-pointer" onClick={() => navigate('/pinboard')}>
+                <div className="flex items-center justify-center mb-3">
+                  <div className="text-4xl">📌</div>
+                </div>
+                <h3 className="font-semibold mb-2">View Interactive Pinboard</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Experience the full Pinterest-like interface with embedded iframe
                 </p>
-              </div>
-              <PinGrid pins={pins.slice(0, 12)} currentUserId={session?.user?.id} />
-              {pinId && (
-                <PinModal
-                  pin={null}
-                  pinId={pinId}
-                  isOpen={showPinModal}
-                  onClose={() => {
-                    setShowPinModal(false);
-                    navigate('/');
-                  }}
-                />
-              )}
+                <Button size="sm" className="btn-modern">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open Pinboard
+                </Button>
+              </Card>
             </div>
-          )}
+          </div>
+            <PinGrid pins={pins.slice(0, 12)} currentUserId={session?.user?.id} />
+            {pinId && (
+              <PinModal
+                pin={null}
+                pinId={pinId}
+                isOpen={showPinModal}
+                onClose={() => {
+                  setShowPinModal(false);
+                  navigate('/');
+                }}
+              />
+            )}
+          </div>
+        )}
         </main>
       </div>
     );
@@ -189,6 +212,13 @@ const Home = () => {
     <div className="min-h-screen gradient-warm">
       <Header />
       <main className="py-8">
+        {/* Network Status Indicator (Dev Mode) */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="container mx-auto px-4 mb-4">
+            <NetworkIndicator showDetails className="max-w-xs" />
+          </div>
+        )}
+        
         {searchQuery && (
           <div className="container mx-auto px-4 mb-6">
             <h2 className="text-xl font-semibold">Search results for "{searchQuery}"</h2>
@@ -199,7 +229,7 @@ const Home = () => {
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
               <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading pins...</p>
+              <p className="text-muted-foreground">Loading your pins...</p>
             </div>
           </div>
         ) : (

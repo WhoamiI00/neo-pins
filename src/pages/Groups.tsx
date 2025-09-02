@@ -131,12 +131,12 @@ const Groups = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen gradient-warm">
       <Header />
       
       <div className="h-[calc(100vh-4rem)] flex">
         {/* Groups Sidebar */}
-        <div className="w-80 border-r bg-card">
+        <div className="w-80 border-r bg-card/50 backdrop-blur-sm">
           <GroupSidebar
             selectedGroupId={selectedGroup?.id}
             onGroupSelect={handleGroupSelect}
@@ -145,7 +145,7 @@ const Groups = () => {
         </div>
 
         {/* Main Chat Area */}
-        <div className="flex-1">
+        <div className="flex-1 bg-gradient-warm">
           {selectedGroup ? (
             <GroupChatView
               group={selectedGroup}
@@ -154,21 +154,34 @@ const Groups = () => {
             />
           ) : (
             <div className="h-full flex items-center justify-center">
-              <div className="text-center space-y-4 max-w-md">
+              <div className="text-center space-y-4 max-w-md animate-fade-in">
                 <div className="relative">
-                  <Users className="h-16 w-16 mx-auto text-muted-foreground/50" />
-                  <MessageCircle className="h-8 w-8 absolute -bottom-1 -right-1 text-primary" />
+                  <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-12 w-12 text-primary" />
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                    <MessageCircle className="h-5 w-5 text-white" />
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-xl font-semibold">Welcome to Groups</h2>
+                  <h2 className="text-2xl font-bold text-gradient">Welcome to Groups</h2>
                   <p className="text-muted-foreground">
                     Select a group from the sidebar to start chatting, or create a new group to get started.
                   </p>
+                  <p className="text-sm text-muted-foreground">
+                    Share images, links, and pins with your community!
+                  </p>
                 </div>
-                <Button onClick={() => navigate('/groups')}>
-                  <Users className="h-4 w-4 mr-2" />
-                  View All Groups
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button onClick={() => navigate('/groups')} className="btn-modern">
+                    <Users className="h-4 w-4 mr-2" />
+                    View All Groups
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/')}>
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Explore Pins
+                  </Button>
+                </div>
               </div>
             </div>
           )}

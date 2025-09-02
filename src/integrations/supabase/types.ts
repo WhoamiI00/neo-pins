@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -189,7 +189,13 @@ export type Database = {
           created_at: string
           group_id: string
           id: string
+          image_url: string | null
+          link_description: string | null
+          link_image_url: string | null
+          link_title: string | null
+          link_url: string | null
           message_type: string | null
+          platform: string | null
           updated_at: string
           user_id: string
         }
@@ -198,7 +204,13 @@ export type Database = {
           created_at?: string
           group_id: string
           id?: string
+          image_url?: string | null
+          link_description?: string | null
+          link_image_url?: string | null
+          link_title?: string | null
+          link_url?: string | null
           message_type?: string | null
+          platform?: string | null
           updated_at?: string
           user_id: string
         }
@@ -207,7 +219,13 @@ export type Database = {
           created_at?: string
           group_id?: string
           id?: string
+          image_url?: string | null
+          link_description?: string | null
+          link_image_url?: string | null
+          link_title?: string | null
+          link_url?: string | null
           message_type?: string | null
+          platform?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -389,11 +407,11 @@ export type Database = {
         }[]
       }
       user_is_group_admin: {
-        Args: { user_uuid: string; group_uuid: string }
+        Args: { group_uuid: string; user_uuid: string }
         Returns: boolean
       }
       user_is_group_member: {
-        Args: { user_uuid: string; group_uuid: string }
+        Args: { group_uuid: string; user_uuid: string }
         Returns: boolean
       }
     }

@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Send, MoreVertical, Users, Settings, Trash2 } from 'lucide-react';
+import { MoreVertical, Users, Settings, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import MessageRenderer from './MessageRenderer';
+import MessageInput from './MessageInput';
 
 interface Group {
   id: string;
@@ -22,6 +23,12 @@ interface GroupMessage {
   id: string;
   content: string;
   message_type: string;
+  image_url?: string;
+  link_url?: string;
+  link_title?: string;
+  link_description?: string;
+  link_image_url?: string;
+  platform?: string;
   created_at: string;
   user_id: string;
   profiles?: {
@@ -40,8 +47,6 @@ interface GroupChatViewProps {
 export const GroupChatView = ({ group, onOpenSettings, onOpenInvite }: GroupChatViewProps) => {
   const [messages, setMessages] = useState<GroupMessage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newMessage, setNewMessage] = useState('');
-  const [sending, setSending] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -160,36 +165,9 @@ export const GroupChatView = ({ group, onOpenSettings, onOpenInvite }: GroupChat
     }
   };
 
-  const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || sending) return;
-
-    setSending(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { error } = await supabase
-        .from('group_messages')
-        .insert({
-          group_id: group.id,
-          user_id: user.id,
-          content: newMessage.trim(),
-          message_type: 'text',
-        });
-
-      if (error) throw error;
-      setNewMessage('');
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to send message',
-        variant: 'destructive',
-      });
-    } finally {
-      setSending(false);
-    }
+  const handleMessageSent = () => {
+    // The MessageInput component handles sending, we just need to refresh
+    // Real-time updates will handle adding the new message
   };
 
   const deleteMessage = async (messageId: string) => {
@@ -317,10 +295,10 @@ export const GroupChatView = ({ group, onOpenSettings, onOpenInvite }: GroupChat
             messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex gap-3 ${isOwnMessage(message) ? 'justify-end' : ''}`}
+                className={`flex gap-3 animate-fade-in ${isOwnMessage(message) ? 'justify-end' : ''}`}
               >
                 {!isOwnMessage(message) && (
-                  <Avatar className="h-8 w-8">
+                  <Avatar className="h-8 w-8 flex-shrink-0">
                     <AvatarImage src={message.profiles?.avatar_url} />
                     <AvatarFallback>
                       {(message.profiles?.full_name || message.profiles?.email || '').charAt(0).toUpperCase()}
@@ -328,7 +306,7 @@ export const GroupChatView = ({ group, onOpenSettings, onOpenInvite }: GroupChat
                   </Avatar>
                 )}
                 
-                <div className={`flex-1 max-w-xs ${isOwnMessage(message) ? 'text-right' : ''}`}>
+                <div className={`flex-1 ${isOwnMessage(message) ? 'text-right' : ''}`}>
                   {!isOwnMessage(message) && (
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm font-medium">
@@ -341,15 +319,10 @@ export const GroupChatView = ({ group, onOpenSettings, onOpenInvite }: GroupChat
                   )}
                   
                   <div className="group relative">
-                    <div
-                      className={`inline-block p-3 rounded-lg ${
-                        isOwnMessage(message)
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
-                      }`}
-                    >
-                      <p className="text-sm">{message.content}</p>
-                    </div>
+                    <MessageRenderer 
+                      message={message} 
+                      isOwnMessage={isOwnMessage(message)} 
+                    />
                     
                     {isOwnMessage(message) && (
                       <span className="text-xs text-muted-foreground block mt-1">
@@ -361,7 +334,7 @@ export const GroupChatView = ({ group, onOpenSettings, onOpenInvite }: GroupChat
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="absolute -top-2 -right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-2 -right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                         onClick={() => deleteMessage(message.id)}
                       >
                         <Trash2 className="h-3 w-3" />
@@ -376,20 +349,12 @@ export const GroupChatView = ({ group, onOpenSettings, onOpenInvite }: GroupChat
         </div>
       </ScrollArea>
 
-      {/* Message Input */}
-      <div className="p-4 border-t">
-        <form onSubmit={sendMessage} className="flex gap-2">
-          <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder={`Message ${group.name}...`}
-            disabled={sending}
-            maxLength={1000}
-          />
-          <Button type="submit" disabled={!newMessage.trim() || sending}>
-            <Send className="h-4 w-4" />
-          </Button>
-        </form>
+      {/* Enhanced Message Input */}
+      <div className="p-4 border-t bg-muted/30">
+        <MessageInput
+          groupId={group.id}
+          onMessageSent={handleMessageSent}
+        />
       </div>
     </div>
   );
