@@ -109,7 +109,7 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="container mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
         {/* Logo */}
         <div 
           className="flex items-center space-x-2 cursor-pointer flex-shrink-0" 
@@ -123,16 +123,16 @@ const Header = () => {
           <span className="text-lg md:text-xl font-bold hidden sm:block">PinBoard</span>
         </div>
 
-        {/* Search Bar (centered) */}
-        <div className="flex-1 max-w-2xl mx-4 md:mx-8">
+        {/* Search Bar (responsive) */}
+        <div className="flex-1 max-w-2xl mx-2 sm:mx-4 md:mx-8">
           <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search for pins..."
+              placeholder="Search pins..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-10 pr-4 rounded-full border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+              className="w-full h-9 sm:h-10 pl-10 pr-4 rounded-full border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             />
           </form>
         </div>
@@ -142,7 +142,7 @@ const Header = () => {
           {user ? (
             <>
               <ThemeToggle />
-              <Button 
+{/*               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => navigate("/groups")}
@@ -150,7 +150,7 @@ const Header = () => {
               >
                 <Users className="h-4 w-4 md:mr-2" />
                 <span className="hidden md:inline">Groups</span>
-              </Button> 
+              </Button> */}
               <Button 
                 variant="ghost" 
                 size="sm"

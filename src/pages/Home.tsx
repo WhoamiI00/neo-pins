@@ -20,6 +20,7 @@ interface Pin {
   user_id: string;
   board_id: string;
   created_at: string;
+  is_nsfw?: boolean;
   profiles?: {
     full_name?: string;
     email: string;
@@ -118,28 +119,27 @@ const Home = () => {
 
 
   if (!session) {
-    return (
-      <div className="min-h-screen">
-        <Header />
-        <main className="container mx-auto px-4 py-8">
+  return (
+    <div className="min-h-screen">
+      <main className="container mx-auto px-4 py-8">
           {/* Hero Section */}
-          <div className="text-center py-20 max-w-5xl mx-auto">
-            <div className="mb-8">
-              <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+          <div className="text-center py-12 px-4 max-w-5xl mx-auto">
+            <div className="mb-6">
+              <span className="inline-block px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
                 ✨ Discover & Save Ideas
               </span>
             </div>
-            <h1 className="text-6xl md:text-7xl font-bold mb-8 text-gradient leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-gradient leading-tight">
               Save ideas you love
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-10 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed max-w-3xl mx-auto">
               Collect your favorites so you can get back to them later. Create beautiful boards to organize your pins by theme and inspiration.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto sm:max-w-none">
               <Button 
                 size="lg"
                 onClick={() => navigate("/auth")}
-                className="rounded-full px-10 py-6 text-lg font-semibold btn-modern shadow-card hover:shadow-hover"
+                className="rounded-full px-8 py-4 text-base sm:text-lg font-semibold btn-modern shadow-card hover:shadow-hover w-full sm:w-auto"
               >
                 Get Started Free
               </Button>
@@ -147,7 +147,7 @@ const Home = () => {
                 variant="outline"
                 size="lg" 
                 onClick={() => navigate("/auth")}
-                className="rounded-full px-10 py-6 text-lg font-semibold border-2 hover:bg-accent/50"
+                className="rounded-full px-8 py-4 text-base sm:text-lg font-semibold border-2 hover:bg-accent/50 w-full sm:w-auto"
               >
                 Sign In
               </Button>
@@ -164,30 +164,14 @@ const Home = () => {
           </div>
         ) : (
           <div className="mb-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient">
+          <div className="text-center mb-8 px-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 text-gradient">
               Discover inspiring ideas
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
               Explore beautiful pins from our community and get inspired for your next project
             </p>
             
-            {/* Interactive Pinboard Preview */}
-            <div className="mt-8 max-w-md mx-auto">
-              <Card className="p-4 glass-card hover-lift cursor-pointer" onClick={() => navigate('/pinboard')}>
-                <div className="flex items-center justify-center mb-3">
-                  <div className="text-4xl">📌</div>
-                </div>
-                <h3 className="font-semibold mb-2">View Interactive Pinboard</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Experience the full Pinterest-like interface with embedded iframe
-                </p>
-                <Button size="sm" className="btn-modern">
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Open Pinboard
-                </Button>
-              </Card>
-            </div>
           </div>
             <PinGrid pins={pins.slice(0, 12)} currentUserId={session?.user?.id} />
             {pinId && (
@@ -210,7 +194,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen gradient-warm">
-      <Header />
       <main className="py-8">
         {/* Network Status Indicator (Dev Mode) */}
         {process.env.NODE_ENV === 'development' && (
