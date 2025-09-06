@@ -123,8 +123,7 @@ const App = () => {
                 </main>
               </div>
               
-              {/* AI Assistant - Available on all pages */}
-              <AIAssistant />
+              
             </SidebarProvider>
           </BrowserRouter>
         </TooltipProvider>
