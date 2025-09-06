@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Link } from "react-router-dom";
 
 interface AppSidebarProps {
   user?: any;
@@ -94,17 +95,17 @@ export function AppSidebar({ user, userProfile }: AppSidebarProps) {
       <SidebarContent className="flex flex-col h-full">
         {/* Header */}
         <div className="p-4 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img 
-                src="/lovable-uploads/dd15324d-eb74-4e88-9e81-b3dac66be0a1.png" 
-                alt="PinBoard Logo" 
+          <div className="flex items-center justify-between ">
+            <Link to="/" className="flex items-center gap-3 ">
+              <img
+                src="/lovable-uploads/dd15324d-eb74-4e88-9e81-b3dac66be0a1.png"
+                alt="PinBoard Logo"
                 className="w-8 h-8 flex-shrink-0"
               />
               {!isCollapsed && (
-                <span className="text-lg font-bold">PinBoard</span>
+                <span className="text-lg font-bold cursor-pointer">PinBoard</span>
               )}
-            </div>
+            </Link>
             {/* Close button for mobile */}
             <Button
               variant="ghost"
@@ -182,8 +183,8 @@ export function AppSidebar({ user, userProfile }: AppSidebarProps) {
                         {!isCollapsed && <span>{item.title}</span>}
                       </button>
                     ) : (
-                      <NavLink 
-                        to={item.url} 
+                      <NavLink
+                        to={item.url}
                         className="flex items-center gap-3"
                         onClick={() => {
                           if (isMobile) setOpenMobile(false);

@@ -161,22 +161,21 @@ const Following = () => {
                   key={follow.id}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <div 
+                  <div
                     className="flex items-center gap-3 cursor-pointer flex-1"
                     onClick={() => navigate(`/user/${follow.profiles.user_id}`)}
                   >
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={follow.profiles.avatar_url || ""} />
                       <AvatarFallback>
-                        {(follow.profiles.full_name || follow.profiles.email).charAt(0).toUpperCase()}
+                        {(follow.profiles.full_name
+                          ? follow.profiles.full_name.charAt(0).toUpperCase()
+                          : "U")}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">
-                        {follow.profiles.full_name || follow.profiles.email}
-                      </p>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {follow.profiles.email}
+                        {follow.profiles.full_name || "Unnamed User"}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Following since {new Date(follow.created_at).toLocaleDateString()}
@@ -193,6 +192,7 @@ const Following = () => {
                     Unfollow
                   </Button>
                 </div>
+
               ))}
             </div>
           )}
