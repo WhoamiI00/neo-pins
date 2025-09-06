@@ -8,6 +8,7 @@ import SavePinDialog from "./SavePinDialog";
 import ImageActions from "./ImageActions";
 import { preloadImage } from "@/utils/imageUtils";
 import { supabase } from "@/integrations/supabase/client";
+import { motion, useSpring, useMotionValue, useTransform } from "framer-motion";
 
 interface Pin {
   id: string;
@@ -86,11 +87,70 @@ const PinCard = ({ pin, onClick, className, currentUserId, onPinDeleted }: PinCa
     onPinDeleted?.(pin.id);
   };
 
-  // Use NetworkImage component for enhanced rendering
+  // Motion values for smooth interactions
+  const scale = useMotionValue(1);
+  const y = useMotionValue(0);
+  const opacity = useMotionValue(1);
+
+  const cardVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: 30,
+      scale: 0.95
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring" as const,
+        stiffness: 100,
+        damping: 15,
+        mass: 0.8
+      }
+    },
+    hover: {
+      scale: 1.02,
+      y: -5,
+      transition: {
+        type: "spring" as const,
+        stiffness: 400,
+        damping: 25
+      }
+    }
+  };
+
+  const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: {
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1] as const
+      }
+    }
+  };
+
+  const buttonVariants = {
+    hidden: { scale: 0, opacity: 0 },
+    visible: { 
+      scale: 1, 
+      opacity: 1,
+      transition: {
+        type: "spring" as const,
+        stiffness: 500,
+        damping: 20,
+        delay: 0.1
+      }
+    }
+  };
 
   return (
-    <Card 
-      ref={cardRef}
+    <motion.div
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      whileHover="hover"
       className={cn(
         "group relative overflow-hidden rounded-2xl cursor-pointer pin-card bg-gradient-card",
         className
@@ -99,17 +159,20 @@ const PinCard = ({ pin, onClick, className, currentUserId, onPinDeleted }: PinCa
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      <Card 
+        ref={cardRef}
+        className="border-0 bg-transparent shadow-none"
+      >
       <div className="relative">
-        {/* Standard Image */}
+        {/* Enhanced Image with Motion */}
         <div className="relative overflow-hidden rounded-xl">
           {!imageError ? (
             <div className="relative">
-              <img
+                <motion.img
                 src={pin.image_url}
                 alt={pin.title}
                 className={cn(
-                  "w-full h-auto object-cover transition-all duration-300",
-                  isHovered && "scale-105",
+                  "w-full h-auto object-cover",
                   pin.is_nsfw && !showNsfwContent && "blur-md"
                 )}
                 onLoad={() => setIsImageLoaded(true)}
@@ -118,6 +181,9 @@ const PinCard = ({ pin, onClick, className, currentUserId, onPinDeleted }: PinCa
                   setIsImageLoaded(true);
                 }}
                 loading="lazy"
+                initial={{ scale: 1 }}
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
               />
               
               {/* NSFW Overlay */}
@@ -152,62 +218,102 @@ const PinCard = ({ pin, onClick, className, currentUserId, onPinDeleted }: PinCa
           )}
         </div>
 
-        {/* Hover overlay */}
+        {/* Enhanced Hover Overlay */}
         {isHovered && (
-          <div className="absolute inset-0 bg-black/20 transition-opacity duration-200">
+          <motion.div 
+            className="absolute inset-0 bg-black/20"
+            variants={overlayVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <div className="absolute top-2 right-2 flex space-x-2">
-              <Button
-                size="sm"
-                className="rounded-full shadow-lg bg-primary hover:bg-primary-hover btn-modern text-white font-medium"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowSaveDialog(true);
-                }}
+              <motion.div
+                variants={buttonVariants}
+                initial="hidden"
+                animate="visible"
               >
-                Save
-              </Button>
-              <ImageActions 
-                imageUrl={pin.image_url} 
-                title={pin.title}
-                pinId={pin.id}
-                userId={pin.user_id}
-                currentUserId={currentUserId}
-                onDelete={handlePinDeleted}
-              />
+                <Button
+                  size="sm"
+                  className="rounded-full shadow-lg bg-primary hover:bg-primary-hover btn-modern text-white font-medium"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowSaveDialog(true);
+                  }}
+                >
+                  Save
+                </Button>
+              </motion.div>
+              <motion.div
+                variants={buttonVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 0.05 }}
+              >
+                <ImageActions 
+                  imageUrl={pin.image_url} 
+                  title={pin.title}
+                  pinId={pin.id}
+                  userId={pin.user_id}
+                  currentUserId={currentUserId}
+                  onDelete={handlePinDeleted}
+                />
+              </motion.div>
             </div>
             
-            {/* Stats overlay */}
+            {/* Enhanced Stats Overlay */}
             <div className="absolute bottom-2 left-2 flex items-center gap-2">
               {statsLoaded && (
-                <div className="flex items-center gap-3 bg-black/70 backdrop-blur-sm rounded-full px-3 py-1.5 text-white text-xs">
-                  <div className="flex items-center gap-1">
+                <motion.div 
+                  className="flex items-center gap-3 bg-black/70 backdrop-blur-sm rounded-full px-3 py-1.5 text-white text-xs"
+                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 300, 
+                    damping: 25,
+                    delay: 0.2 
+                  }}
+                >
+                  <motion.div 
+                    className="flex items-center gap-1"
+                    whileHover={{ scale: 1.1 }}
+                  >
                     <Heart className="h-3 w-3" />
                     <span>{likesCount}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
+                  </motion.div>
+                  <motion.div 
+                    className="flex items-center gap-1"
+                    whileHover={{ scale: 1.1 }}
+                  >
                     <MessageCircle className="h-3 w-3" />
                     <span>{commentsCount}</span>
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
               )}
             </div>
 
             {pin.original_url && (
               <div className="absolute bottom-2 right-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-full bg-white/90 hover:bg-white text-foreground shadow-lg text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.open(pin.original_url, '_blank');
-                  }}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.25 }}
                 >
-                  Visit
-                </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="rounded-full bg-white/90 hover:bg-white text-foreground shadow-lg text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(pin.original_url, '_blank');
+                    }}
+                  >
+                    Visit
+                  </Button>
+                </motion.div>
               </div>
             )}
-          </div>
+          </motion.div>
         )}
       </div>
 
@@ -218,23 +324,43 @@ const PinCard = ({ pin, onClick, className, currentUserId, onPinDeleted }: PinCa
         pinTitle={pin.title}
       />
 
-      {/* Pin info */}
-      <div className="p-3">
-        <h3 className="font-medium text-sm line-clamp-2 mb-1">
+      {/* Enhanced Pin Info */}
+      <motion.div 
+        className="p-3"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        <motion.h3 
+          className="font-medium text-sm line-clamp-2 mb-1"
+          whileHover={{ color: "hsl(var(--primary))" }}
+          transition={{ duration: 0.2 }}
+        >
           {pin.title}
-        </h3>
+        </motion.h3>
         {pin.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+          <motion.p 
+            className="text-xs text-muted-foreground line-clamp-2 mb-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
             {pin.description}
-          </p>
+          </motion.p>
         )}
         {pin.profiles && (
-          <div className="flex items-center text-xs text-muted-foreground">
+          <motion.div 
+            className="flex items-center text-xs text-muted-foreground"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
             <span>{pin.profiles.full_name || pin.profiles.email}</span>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </Card>
+    </motion.div>
   );
 };
 

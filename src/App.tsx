@@ -8,6 +8,7 @@ import { ThemeProvider } from "next-themes";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { BotProtectionWrapper } from "@/components/BotProtectionWrapper";
+import { AIAssistant } from "@/components/AIAssistant";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -121,6 +122,9 @@ const App = () => {
                   {/* </BotProtectionWrapper> */}
                 </main>
               </div>
+              
+              {/* AI Assistant - Available on all pages */}
+              <AIAssistant />
             </SidebarProvider>
           </BrowserRouter>
         </TooltipProvider>
