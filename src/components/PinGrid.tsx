@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import PinCard from "./PinCard";
 import { cn } from "@/lib/utils";
-import { motion, stagger, useAnimate } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface Pin {
   id: string;
@@ -27,9 +27,13 @@ interface PinGridProps {
   onPinDeleted?: (pinId: string) => void;
 }
 
-const PinGrid = ({ pins, onPinClick, className, currentUserId, onPinDeleted }: PinGridProps) => {
+// Memoize the component to prevent unnecessary re-renders
+const PinGrid = memo(({ pins, onPinClick, className, currentUserId, onPinDeleted }: PinGridProps) => {
   const [columns, setColumns] = useState(4);
   const navigate = useNavigate();
+
+  // Performance: Prioritize first 6 images for faster LCP (above the fold)
+  const PRIORITY_IMAGE_COUNT = 6;
 
   useEffect(() => {
     const updateColumns = () => {
@@ -148,35 +152,44 @@ const PinGrid = ({ pins, onPinClick, className, currentUserId, onPinDeleted }: P
                 damping: 15
               }}
             >
-              {columnPins.map((pin, pinIndex) => (
-                <motion.div
-                  key={pin.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    delay: (columnIndex * 0.05) + (pinIndex * 0.1),
-                    type: "spring" as const,
-                    stiffness: 80,
-                    damping: 12
-                  }}
-                >
-                <PinCard
-                  pin={pin}
-                  onClick={() => {
-                    navigate(`/pin/${pin.id}`);
-                    onPinClick?.(pin);
-                  }}
-                  className="w-full"
-                  currentUserId={currentUserId}
-                  onPinDeleted={onPinDeleted}
-                />
-              </motion.div>
-            ))}
+              {columnPins.map((pin, pinIndex) => {
+                // Calculate global index for priority loading
+                const globalIndex = columnIndex + (pinIndex * columns);
+                const isPriority = globalIndex < PRIORITY_IMAGE_COUNT;
+                
+                return (
+                  <motion.div
+                    key={pin.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ 
+                      delay: (columnIndex * 0.05) + (pinIndex * 0.1),
+                      type: "spring" as const,
+                      stiffness: 80,
+                      damping: 12
+                    }}
+                  >
+                    <PinCard
+                      pin={pin}
+                      onClick={() => {
+                        navigate(`/pin/${pin.id}`);
+                        onPinClick?.(pin);
+                      }}
+                      className="w-full"
+                      currentUserId={currentUserId}
+                      onPinDeleted={onPinDeleted}
+                      priority={isPriority}
+                    />
+                  </motion.div>
+                );
+              })}
           </motion.div>
         ))}
       </motion.div>
     </motion.div>
   );
-};
+});
+
+PinGrid.displayName = "PinGrid";
 
 export default PinGrid;

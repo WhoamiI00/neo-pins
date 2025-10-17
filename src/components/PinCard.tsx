@@ -1,14 +1,14 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { gsapAnimations } from "@/hooks/useGSAP";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SavePinDialog from "./SavePinDialog";
 import ImageActions from "./ImageActions";
-import { preloadImage } from "@/utils/imageUtils";
 import { supabase } from "@/integrations/supabase/client";
-import { motion, useSpring, useMotionValue, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
+import OptimizedImage from "./OptimizedImage";
 
 interface Pin {
   id: string;
@@ -32,20 +32,25 @@ interface PinCardProps {
   className?: string;
   currentUserId?: string;
   onPinDeleted?: (pinId: string) => void;
+  priority?: boolean; // For above-the-fold images
 }
 
-const PinCard = ({ pin, onClick, className, currentUserId, onPinDeleted }: PinCardProps) => {
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
+// Memoize the component to prevent unnecessary re-renders
+const PinCard = memo(({ 
+  pin, 
+  onClick, 
+  className, 
+  currentUserId, 
+  onPinDeleted,
+  priority = false 
+}: PinCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [commentsCount, setCommentsCount] = useState(0);
   const [statsLoaded, setStatsLoaded] = useState(false);
   const [showNsfwContent, setShowNsfwContent] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  
 
   useEffect(() => {
     if (cardRef.current) {
@@ -54,14 +59,8 @@ const PinCard = ({ pin, onClick, className, currentUserId, onPinDeleted }: PinCa
     }
   }, []);
 
-  // Fetch stats on hover
-  useEffect(() => {
-    if (isHovered && !statsLoaded) {
-      fetchPinStats();
-    }
-  }, [isHovered, statsLoaded]);
-
-  const fetchPinStats = async () => {
+  // Memoize the fetch function to prevent recreating on every render
+  const fetchPinStats = useCallback(async () => {
     try {
       // Fetch likes count
       const { count: likes } = await supabase
@@ -81,16 +80,18 @@ const PinCard = ({ pin, onClick, className, currentUserId, onPinDeleted }: PinCa
     } catch (error) {
       console.error('Error fetching pin stats:', error);
     }
-  };
+  }, [pin.id]);
 
-  const handlePinDeleted = () => {
+  // Fetch stats on hover (lazy load stats)
+  useEffect(() => {
+    if (isHovered && !statsLoaded) {
+      fetchPinStats();
+    }
+  }, [isHovered, statsLoaded, fetchPinStats]);
+
+  const handlePinDeleted = useCallback(() => {
     onPinDeleted?.(pin.id);
-  };
-
-  // Motion values for smooth interactions
-  const scale = useMotionValue(1);
-  const y = useMotionValue(0);
-  const opacity = useMotionValue(1);
+  }, [onPinDeleted, pin.id]);
 
   const cardVariants = {
     hidden: { 
@@ -164,56 +165,40 @@ const PinCard = ({ pin, onClick, className, currentUserId, onPinDeleted }: PinCa
         className="border-0 bg-transparent shadow-none"
       >
       <div className="relative">
-        {/* Enhanced Image with Motion */}
+        {/* Optimized Image Component with lazy loading and proper aspect ratio */}
         <div className="relative overflow-hidden rounded-xl">
-          {!imageError ? (
-            <div className="relative">
-                <motion.img
-                src={pin.image_url}
-                alt={pin.title}
-                className={cn(
-                  "w-full h-auto object-cover",
-                  pin.is_nsfw && !showNsfwContent && "blur-md"
-                )}
-                onLoad={() => setIsImageLoaded(true)}
-                onError={() => {
-                  setImageError(true);
-                  setIsImageLoaded(true);
-                }}
-                loading="lazy"
-                initial={{ scale: 1 }}
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              />
-              
-              {/* NSFW Overlay */}
-              {pin.is_nsfw && !showNsfwContent && (
-                <div 
-                  className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowNsfwContent(true);
-                  }}
-                >
-                  <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 text-center">
-                    <p className="text-sm font-medium text-gray-900">NSFW Content</p>
-                    <p className="text-xs text-gray-600 mt-1">Click to view</p>
-                  </div>
-                </div>
-              )}
-              
-              {/* NSFW Tag */}
-              {pin.is_nsfw && (
-                <div className="absolute top-2 left-2">
-                  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                    NSFW
-                  </span>
-                </div>
-              )}
+          <OptimizedImage
+            src={pin.image_url}
+            alt={pin.title}
+            className={cn(
+              "w-full",
+              pin.is_nsfw && !showNsfwContent && "blur-md"
+            )}
+            priority={priority}
+          />
+          
+          {/* NSFW Overlay */}
+          {pin.is_nsfw && !showNsfwContent && (
+            <div 
+              className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowNsfwContent(true);
+              }}
+            >
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 text-center">
+                <p className="text-sm font-medium text-gray-900">NSFW Content</p>
+                <p className="text-xs text-gray-600 mt-1">Click to view</p>
+              </div>
             </div>
-          ) : (
-            <div className="w-full h-48 bg-muted flex items-center justify-center rounded-lg">
-              <span className="text-muted-foreground text-sm">Failed to load image</span>
+          )}
+          
+          {/* NSFW Tag */}
+          {pin.is_nsfw && (
+            <div className="absolute top-2 left-2">
+              <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                NSFW
+              </span>
             </div>
           )}
         </div>
@@ -362,6 +347,8 @@ const PinCard = ({ pin, onClick, className, currentUserId, onPinDeleted }: PinCa
     </Card>
     </motion.div>
   );
-};
+});
+
+PinCard.displayName = "PinCard";
 
 export default PinCard;

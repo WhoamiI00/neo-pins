@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense, memo } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,24 +7,68 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { BotProtectionWrapper } from "@/components/BotProtectionWrapper";
-import { AIAssistant } from "@/components/AIAssistant";
 import { supabase } from "@/integrations/supabase/client";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import ResetPassword from "./pages/ResetPassword";
-import CreatePin from "./pages/CreatePin";
-import Profile from "./pages/Profile";
-import UserProfile from "./pages/UserProfile";
-import Board from "./pages/Board";
-import Groups from "./pages/Groups";
-import JoinGroup from "./pages/JoinGroup";
-import PinboardView from "./pages/PinboardView";
-import Followers from "./pages/Followers";
-import Following from "./pages/Following";
-import NotFound from "./pages/NotFound";
+import { motion } from "framer-motion";
 
-const queryClient = new QueryClient();
+// Lazy load page components for code splitting
+// This significantly reduces initial bundle size and improves First Contentful Paint (FCP)
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const CreatePin = lazy(() => import("./pages/CreatePin"));
+const Profile = lazy(() => import("./pages/Profile"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
+const Board = lazy(() => import("./pages/Board"));
+const Groups = lazy(() => import("./pages/Groups"));
+const JoinGroup = lazy(() => import("./pages/JoinGroup"));
+const PinboardView = lazy(() => import("./pages/PinboardView"));
+const Followers = lazy(() => import("./pages/Followers"));
+const Following = lazy(() => import("./pages/Following"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Optimized QueryClient with better defaults for performance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes - reduce unnecessary refetches
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      refetchOnWindowFocus: false, // Prevent refetch on every window focus
+      retry: 1, // Reduce retry attempts for faster failure feedback
+    },
+  },
+});
+
+// Memoized loading fallback to prevent unnecessary re-renders
+const RouteLoadingFallback = memo(() => (
+  <motion.div
+    className="flex items-center justify-center min-h-screen"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+  >
+    <div className="text-center">
+      <motion.div
+        className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"
+        animate={{ rotate: 360 }}
+        transition={{
+          duration: 1,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+      />
+      <motion.p
+        className="text-muted-foreground"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        Loading...
+      </motion.p>
+    </div>
+  </motion.div>
+));
+
+RouteLoadingFallback.displayName = "RouteLoadingFallback";
 
 const App = () => {
   const [user, setUser] = useState<any>(null);
@@ -89,6 +133,9 @@ const App = () => {
                         src="/lovable-uploads/dd15324d-eb74-4e88-9e81-b3dac66be0a1.png" 
                         alt="PinBoard Logo" 
                         className="w-6 h-6"
+                        width="24"
+                        height="24"
+                        loading="eager"
                       />
                       <span className="font-bold text-lg">PinBoard</span>
                     </div>
@@ -99,9 +146,9 @@ const App = () => {
                 {/* Desktop Sidebar */}
                 <AppSidebar user={user} userProfile={userProfile} />
                 
-                {/* Main Content */}
+                {/* Main Content with Suspense for lazy-loaded routes */}
                 <main className="flex-1 lg:ml-0 pt-14 lg:pt-0">
-                  {/* <BotProtectionWrapper> */}
+                  <Suspense fallback={<RouteLoadingFallback />}>
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/auth" element={<Auth />} />
@@ -119,7 +166,7 @@ const App = () => {
                       <Route path="/following" element={<Following />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
-                  {/* </BotProtectionWrapper> */}
+                  </Suspense>
                 </main>
               </div>
               
